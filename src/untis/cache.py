@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import ScraperConfig
-from .dates import pick_school_day, school_day_window, trim_timetable
+from .dates import homework_date, pick_school_day, school_day_window, trim_timetable
 from .exporter import _strip_raw
 from .privacy import write_private_text
 
@@ -113,9 +113,8 @@ def slice_payload(
     if "exams" in out and "exams" in out["exams"]:
         out["exams"]["exams"] = [e for e in out["exams"]["exams"] if _in(e.get("date"), start, end)]
     if "homework" in out and "items" in out["homework"]:
-        primary, fallback = ("due_date", "date") if homework_by_due_date else ("date", "due_date")
         out["homework"]["items"] = [h for h in out["homework"]["items"]
-                                    if _in(h.get(primary) or h.get(fallback), start, end)]
+                                    if _in(homework_date(h, homework_by_due_date), start, end)]
     if "absences" in out and "items" in out["absences"]:
         out["absences"]["items"] = [a for a in out["absences"]["items"]
                                     if _in(a.get("start_date"), start, end)]
